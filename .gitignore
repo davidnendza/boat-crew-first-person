@@ -1,0 +1,16 @@
+# build output: the DLL is built locally, never committed
+out/
+*.dll
+*.obj
+*.exp
+*.lib
+*.pdb
+
+# the game writes these next to itself, never here, but just in case
+BoatCrewMod/
+mod.log
+config.ini
+
+# game-derived data from the research scripts
+research/dump/
+__pycache__/

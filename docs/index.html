@@ -1,0 +1,245 @@
+<title>Boat Crew Stat Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a ship's station bill. A stat picker on the left drives a detail card; the matrix below shows every stat against every effect. */
+:root {
+  --bg: #e8eef3;
+  --panel: #f8fafc;
+  --ink: #10202e;
+  --ink-soft: #4a5e70;
+  --rule: #c5d1db;
+  --accent: #d4471a;
+  --accent-ink: #ffffff;
+  --found: #10202e;
+  --wash: #dbe5ee;
+  --font-display: "Oswald", "Arial Narrow", Arial, sans-serif;
+  --font-body: "Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-data: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #09131d; --panel: #101e2c; --ink: #e5edf4; --ink-soft: #94a8b9; --rule: #223649;
+    --accent: #ff8a4c; --accent-ink: #1b0d05; --found: #e5edf4; --wash: #16293b; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #09131d; --panel: #101e2c; --ink: #e5edf4; --ink-soft: #94a8b9; --rule: #223649;
+  --accent: #ff8a4c; --accent-ink: #1b0d05; --found: #e5edf4; --wash: #16293b; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font: 15px/1.5 var(--font-body); padding-inline: 16px; padding-block: 20px 40px; }
+.page { max-width: 1040px; margin-inline: auto; display: grid; gap: 28px; }
+h1, h2, h3 { font-family: var(--font-display); font-weight: 600; letter-spacing: .02em; text-transform: uppercase; margin: 0; text-wrap: balance; line-height: 1.1; }
+h1 { font-size: clamp(30px, 6vw, 48px); }
+h2 { font-size: 22px; }
+h3 { font-size: 16px; letter-spacing: .06em; color: var(--ink-soft); }
+p { margin: 0; }
+.mono { font-family: var(--font-data); font-size: 12.5px; }
+.lede { max-width: 62ch; color: var(--ink-soft); margin-top: 10px; }
+header .tag { font: 500 12px var(--font-data); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 22px; margin-top: 16px; font-size: 13px; color: var(--ink-soft); }
+.legend span { display: inline-flex; align-items: center; gap: 8px; }
+.dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; flex: none; }
+.dot.solid { background: var(--found); }
+.dot.likely { border: 2px solid var(--found); }
+.dot.none { background: transparent; border: 1px dashed var(--rule); }
+
+.picker { display: grid; grid-template-columns: minmax(0, 240px) minmax(0, 1fr); gap: 18px; align-items: start; }
+.stats { display: grid; gap: 8px; }
+.stat { display: grid; grid-template-columns: 52px 1fr; align-items: center; gap: 10px; text-align: left; font: inherit; color: inherit; background: var(--panel); border: 1px solid var(--rule); border-left-width: 4px; border-radius: 3px; padding: 10px 12px; cursor: pointer; }
+.stat b { font: 500 15px var(--font-data); }
+.stat span { font-size: 14px; }
+.stat:hover { border-color: var(--ink-soft); }
+.stat[aria-pressed="true"] { border-color: var(--accent); background: var(--wash); }
+.stat:focus-visible, .cell:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.detail { background: var(--panel); border: 1px solid var(--rule); border-radius: 3px; padding: 18px 20px; display: grid; gap: 14px; min-width: 0; }
+.detail .code { font: 500 13px var(--font-data); color: var(--accent); letter-spacing: .08em; }
+.detail h2 { font-size: 28px; }
+.effects { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.effects li { display: grid; grid-template-columns: 14px 1fr; gap: 10px; }
+.effects li .dot { margin-top: 5px; }
+.effects strong { font-weight: 600; }
+.trail { margin-top: 2px; color: var(--ink-soft); font-size: 12.5px; }
+.note { border-top: 1px solid var(--rule); padding-top: 12px; color: var(--ink-soft); font-size: 13.5px; }
+
+.matrix-wrap { overflow-x: auto; border: 1px solid var(--rule); border-radius: 3px; background: var(--panel); }
+table.matrix { border-collapse: collapse; min-width: 760px; width: 100%; }
+.matrix th, .matrix td { padding: 0; text-align: center; }
+.matrix thead th.grp { font: 500 11px var(--font-data); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); padding: 8px 4px 4px; border-bottom: 1px solid var(--rule); border-left: 1px solid var(--rule); }
+.matrix thead th.eff { height: 122px; vertical-align: bottom; border-left: 1px solid var(--rule); }
+.matrix thead th.eff div { writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; font-size: 12.5px; padding: 6px 0; margin-inline: auto; font-weight: 500; }
+.matrix tbody th { text-align: left; padding: 10px 12px; font: 500 13px var(--font-data); white-space: nowrap; border-top: 1px solid var(--rule); }
+.matrix tbody th small { display: block; font: 400 11.5px var(--font-body); color: var(--ink-soft); }
+.matrix td { border-top: 1px solid var(--rule); border-left: 1px solid var(--rule); height: 44px; }
+.matrix tr.on th, .matrix tr.on td { background: var(--wash); }
+.matrix tr.on th { box-shadow: inset 4px 0 0 var(--accent); }
+.matrix .cell { background: none; border: 0; width: 100%; height: 100%; display: grid; place-items: center; cursor: pointer; }
+.matrix .cell .dot { transform: scale(1.1); }
+
+.roles { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
+.card { background: var(--panel); border: 1px solid var(--rule); border-radius: 3px; padding: 14px 16px; display: grid; gap: 6px; align-content: start; min-width: 0; }
+.card h3 { color: var(--ink); }
+.card ul { margin: 0; padding-left: 18px; color: var(--ink-soft); font-size: 13.5px; }
+.pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+.pair .card { padding: 18px; gap: 8px; }
+.pair .num { font: 600 13px var(--font-data); color: var(--accent); letter-spacing: .08em; }
+.constants { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.constants span { font: 400 12px var(--font-data); border: 1px solid var(--rule); border-radius: 99px; padding: 2px 10px; color: var(--ink-soft); background: var(--bg); }
+.unknowns { display: grid; gap: 8px; color: var(--ink-soft); }
+.unknowns li { margin-left: 18px; }
+footer { color: var(--ink-soft); font-size: 12.5px; border-top: 1px solid var(--rule); padding-top: 14px; }
+@media (max-width: 720px) {
+  .picker { grid-template-columns: minmax(0, 1fr); }
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="page">
+  <header>
+    <div class="tag">Crew attributes · role levels · gunnery</div>
+    <h1>What each crew stat does</h1>
+    <p class="lede">Pick a stat to see what the game uses it for. Everything here comes from tracing the game's own compiled code to find which calculations read each stat. It tells you what a stat touches. It does not tell you how much.</p>
+    <div class="legend" aria-label="Legend">
+      <span><i class="dot solid"></i>The game's code reads this stat for this effect</span>
+      <span><i class="dot likely"></i>Read in the right place, but the exact effect is my reading of the name</span>
+      <span><i class="dot none"></i>No link found</span>
+    </div>
+  </header>
+
+  <section aria-labelledby="pick">
+    <h2 id="pick" style="margin-bottom:14px">The six attributes</h2>
+    <div class="picker">
+      <div class="stats" id="stats" role="group" aria-label="Choose an attribute"></div>
+      <article class="detail" id="detail" aria-live="polite"></article>
+    </div>
+  </section>
+
+  <section aria-labelledby="mx">
+    <h2 id="mx" style="margin-bottom:14px">Every stat against every effect</h2>
+    <div class="matrix-wrap"><table class="matrix" id="matrix"></table></div>
+  </section>
+
+  <section aria-labelledby="rl">
+    <h2 id="rl" style="margin-bottom:6px">Role levels</h2>
+    <p class="lede" style="margin:0 0 14px">Each crewmate also earns experience in four roles. A role level is separate from the six attributes and the two are combined in the speed and rate calculations.</p>
+    <div class="roles">
+      <div class="card"><h3>Captain</h3><ul><li>Level feeds the craft handling offset, together with hand-eye coordination.</li></ul></div>
+      <div class="card"><h3>Medic</h3><ul><li>Level feeds heal speed, together with hand-eye coordination.</li></ul></div>
+      <div class="card"><h3>Repairman</h3><ul><li>Level feeds repair speed, together with hand-eye coordination.</li></ul></div>
+      <div class="card"><h3>Gunner</h3><ul><li>Level feeds the gun's turn rate and its aim code, and the game defines a shot-cooldown bonus per gunner level.</li><li>Reload speed also reads a role level, probably this one.</li></ul></div>
+    </div>
+    <p class="note" style="margin-top:14px">The game defines these per-level amounts, so each of them grows with level:</p>
+    <div class="constants" aria-label="Per-level constants">
+      <span>health per level</span><span>move speed per level</span><span>run cooldown cut per level</span><span>repair speed per level</span><span>reload speed per level</span><span>heal speed per level</span><span>gunner turn rate per level</span><span>gunner cooldown per level</span>
+    </div>
+  </section>
+
+  <section aria-labelledby="gn">
+    <h2 id="gn" style="margin-bottom:14px">"Gunnery" means two different things</h2>
+    <div class="pair">
+      <div class="card"><div class="num">GUNNER ROLE LEVEL</div><h3 style="color:var(--ink)">How well this crewmate shoots</h3>
+        <p>Comes from the crewmate's experience as a gunner. It speeds up how fast they swing a gun, shortens the wait between shots, and goes into the gun's aim calculation next to hand-eye coordination. Each weapon also carries its own sway multiplier, so how steady a shot is depends on the crewmate and on the gun.</p></div>
+      <div class="card"><div class="num">GUNNERY SCORE</div><h3 style="color:var(--ink)">A campaign damage bonus</h3>
+        <p>A progression value for your whole fleet, not a crewmate. It is converted into extra damage when a gun fires, and two campaign unlocks add damage effects on top. It makes hits stronger and has nothing to do with aim.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="uk">
+    <h2 id="uk" style="margin-bottom:12px">What this page cannot tell you</h2>
+    <ul class="unknowns">
+      <li>How much. One point of any stat has a real effect size, and I have not read the formulas or the numbers.</li>
+      <li>Which way each effect runs. Faster reloading, steadier aim and a longer survival time are clearly good. For run cooldown I assume a higher stat helps, from the name alone.</li>
+      <li>What "live" means. Each stat has a raw value, a trait adjustment, an effective value and a live value. The live one is what most calculations use. It is probably affected by current condition, which I have not confirmed.</li>
+      <li>How big the adaptability effect is. It clearly feeds the XP gain rate, but I have not read how many points of it change the rate, or how much XP each level costs.</li>
+      <li>Cooperativeness. It feeds a role-contribution score and an ability weight. That points at how crew are ranked or assigned, and I cannot say more.</li>
+    </ul>
+  </section>
+
+  <footer>Source: the game's compiled code, searched for every call to each attribute getter and role-level reader, then matched back to named methods. Game build on Unity 6000.3.</footer>
+</div>
+
+<script>
+const EFFECTS = [
+  { id: 'reload', label: 'Reload speed', group: 'Guns' },
+  { id: 'turn', label: 'Gun turn rate', group: 'Guns' },
+  { id: 'aim', label: 'Aim steadiness', group: 'Guns' },
+  { id: 'repair', label: 'Repair speed', group: 'Jobs' },
+  { id: 'heal', label: 'Heal speed', group: 'Jobs' },
+  { id: 'helm', label: 'Craft handling', group: 'Helm' },
+  { id: 'move', label: 'Move speed', group: 'Movement' },
+  { id: 'run', label: 'Run cooldown', group: 'Movement' },
+  { id: 'swim', label: 'Swimming', group: 'Movement' },
+  { id: 'hp', label: 'Max health', group: 'Survival' },
+  { id: 'over', label: 'Overboard chance', group: 'Survival' },
+  { id: 'down', label: 'Time while downed', group: 'Survival' },
+  { id: 'death', label: 'Instant-death chance', group: 'Survival' },
+  { id: 'role', label: 'Role scoring', group: 'Assignment' },
+  { id: 'xp', label: 'XP gain rate', group: 'Progression' }
+];
+const STATS = [
+  { code: 'RES', name: 'Resilience', summary: 'How much punishment a crewmate takes.',
+    fx: { hp: ['solid', 'Maximum health.', 'maxHealth'], over: ['solid', 'The chance of being thrown overboard.', 'ChanceOverboard'] },
+    note: 'The game also reads it when a crewmate is hit, for the hit reaction.' },
+  { code: 'AGI', name: 'Agility', summary: 'How quickly a crewmate gets around.',
+    fx: { move: ['solid', 'Movement speed on the boat.', 'movementSpeed'], run: ['likely', 'Run cooldown, the recovery time between sprints. Assumed shorter with more agility.', 'RunCooldown'], swim: ['solid', 'Swimming strength after going overboard, and swimming to a pickup.', 'SwimForceEffective, swimToPickup'] },
+    note: '' },
+  { code: 'HEC', name: 'Hand-eye coordination', summary: 'The most widely used stat: guns, repairs, healing and the helm.',
+    fx: { reload: ['solid', 'How quickly a gun is reloaded.', 'reloadSpeedValue'], turn: ['solid', 'How fast a gunner swings a gun onto a target.', 'gunnerTurnRateValue'], aim: ['likely', 'Aim steadiness. The gun mount reads it while aiming and in its per-frame update, next to the recoil and sway code.', 'GunMount.handEyeCoordination'], repair: ['solid', 'How quickly damage is repaired.', 'repairSpeedValue'], heal: ['solid', 'How quickly a wounded crewmate is treated.', 'healSpeedValue'], helm: ['likely', 'Craft handling, an offset in how the boat handles at the helm.', 'craftHandlingOffset'], role: ['likely', 'Role scoring. The role-contribution calculation reads it, together with cooperativeness.', 'RoleContributionScore'] },
+    note: 'Several separate calculations read it, more than any other stat. Reload, repair and heal speed and the gun turn rate also scale with the crewmate\'s role level.' },
+  { code: 'CPT', name: 'Cooperativeness', summary: 'How much a crewmate counts when roles are assigned.',
+    fx: { role: ['likely', 'A role-contribution score (together with hand-eye coordination) and an "ability score weight". They point at how a crewmate is ranked or weighted, not at a visible combat effect.', 'RoleContributionScore, AbilityScoreWeight'] },
+    note: 'No effect on speed, aim or health was found.' },
+  { code: 'ADP', name: 'Adaptability', summary: 'How fast a crewmate learns.',
+    fx: { xp: ['solid', 'How fast the crewmate earns role experience. The game builds the XP gain rate from a base rate and this stat.', 'ExperienceGainRate, baseExperienceGainRate'] },
+    note: 'This is the only attribute the XP rate reads. Adaptability reads no other calculation I could find. Confirmed in the code: the XP-rate calculation loads the raw stat directly.' },
+  { code: 'GRT', name: 'Grit', summary: 'How well a crewmate survives being downed.',
+    fx: { down: ['solid', 'How long a downed crewmate can last before it is too late.', 'AllowedDownedTime'], death: ['solid', 'The chance a downed crewmate dies instantly. The game has a setting for how far above average grit has to be for that chance to reach zero.', 'ChanceDownedInstantDeath, rollInstantDeath'] },
+    note: '' }
+];
+
+const $ = id => document.getElementById(id);
+let current = 'HEC';
+
+function dot(kind) { return '<i class="dot ' + kind + '"></i>'; }
+
+function renderPicker() {
+  $('stats').innerHTML = STATS.map(s =>
+    '<button class="stat" type="button" data-code="' + s.code + '" aria-pressed="' + (s.code === current) + '"><b>' + s.code + '</b><span>' + s.name + '</span></button>').join('');
+}
+function renderDetail() {
+  const s = STATS.find(x => x.code === current);
+  const entries = Object.entries(s.fx);
+  const label = id => EFFECTS.find(e => e.id === id).label;
+  $('detail').innerHTML =
+    '<div><div class="code">' + s.code + '</div><h2>' + s.name + '</h2><p class="lede" style="margin-top:6px">' + s.summary + '</p></div>' +
+    (entries.length
+      ? '<ul class="effects">' + entries.map(([id, [kind, text, trail]]) =>
+          '<li>' + dot(kind) + '<div><strong>' + label(id) + '.</strong> ' + text + '<div class="trail mono">code: ' + trail + '</div></div></li>').join('') + '</ul>'
+      : '') +
+    (s.note ? '<p class="note">' + s.note + '</p>' : '');
+}
+function renderMatrix() {
+  const groups = [];
+  EFFECTS.forEach(e => { const g = groups[groups.length - 1]; if (g && g.name === e.group) g.n++; else groups.push({ name: e.group, n: 1 }); });
+  let html = '<thead><tr><th></th>' + groups.map(g => '<th class="grp" colspan="' + g.n + '">' + g.name + '</th>').join('') + '</tr><tr><th></th>' +
+    EFFECTS.map(e => '<th class="eff"><div>' + e.label + '</div></th>').join('') + '</tr></thead><tbody>';
+  STATS.forEach(s => {
+    html += '<tr class="' + (s.code === current ? 'on' : '') + '"><th scope="row">' + s.code + '<small>' + s.name + '</small></th>' +
+      EFFECTS.map(e => {
+        const f = s.fx[e.id];
+        const kind = f ? f[0] : 'none';
+        const desc = f ? (kind === 'solid' ? 'read by the game' : 'likely') : 'no link found';
+        return '<td><button class="cell" type="button" data-code="' + s.code + '" aria-label="' + s.name + ', ' + e.label + ': ' + desc + '">' + dot(kind) + '</button></td>';
+      }).join('') + '</tr>';
+  });
+  $('matrix').innerHTML = html + '</tbody>';
+}
+function select(code) { current = code; renderPicker(); renderDetail(); renderMatrix(); }
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-code]');
+  if (b) select(b.dataset.code);
+});
+select(current);
+</script>
