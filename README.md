@@ -120,3 +120,5 @@ Along the way the game's crew attributes were traced through its code: what hand
 ## Credits and licence
 
 MIT, see [LICENSE](LICENSE). Boat Crew is by Tabbing Tabby. Class names, field offsets and the game's constants were read from the game with Il2CppInspectorRedux and the mod's own log; no game code or assets are reproduced here.
+
+## Disclaimer\n\nI am not personally affiliated with the developers or publishers of Boat Crew, nor have they endorsed this project.\nBoat Crew and any of its content or materials are the property of their respective owners.\n
